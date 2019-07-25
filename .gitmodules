@@ -1,0 +1,6 @@
+[submodule "sudarepi-a/xproxy"]
+	path = sudarepi-a/xproxy
+	url = https://github.com/led-sudare/xproxy.git
+[submodule "sudarepi-a/cube_adapter"]
+	path = sudarepi-a/cube_adapter
+	url = https://github.com/led-sudare/cube_adapter
