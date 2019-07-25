@@ -1,6 +1,16 @@
 [submodule "sudarepi-a/xproxy"]
 	path = sudarepi-a/xproxy
 	url = https://github.com/led-sudare/xproxy.git
+	branch = master
 [submodule "sudarepi-a/cube_adapter"]
 	path = sudarepi-a/cube_adapter
-	url = https://github.com/led-sudare/cube_adapter
+	url = https://github.com/led-sudare/cube_adapter.git
+	branch = master
+[submodule "sudarepi-b/demos"]
+	path = sudarepi-b/demos
+	url = https://github.com/led-sudare/demos.git
+	branch = master
+[submodule "sudarepi-c/sudare_sim"]
+	path = sudarepi-c/sudare_sim
+	url = https://github.com/led-sudare/sudare_sim.git
+	branch = master
