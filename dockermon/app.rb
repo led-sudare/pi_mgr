@@ -5,25 +5,20 @@ require 'sinatra/reloader'
 require 'sinatra-websocket'
 require 'json'
 
-require 'async'
 require 'net/http'
 require 'uri'
 require 'thread/pool'
 require 'timers'
 
-$mon_target = [
-  { id: 'led_sudare_simulator'}
-]
 
-
-def get_docker_stats
-  raw_stats = `docker stats -a --no-stream led_sudare_simulator`
-  raw_stats = raw_stats.split("\n")[1..-1]
+def get_docker_stats(targets)
   stats = []
-  raw_stats.each{|raw_stat|
-      stat = raw_stat.split(" ")
 
-      stats << {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', '')}
+  targets.each{|t|
+    raw_stats = `#{t[:command]} stats --no-stream #{t[:name]}`
+    raw_stat = raw_stats.split("\n")[1]
+    stat = raw_stat.split(" ")
+    stats << {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', '')}
   }
   stats
 end
@@ -39,10 +34,13 @@ class App < Sinatra::Base
 
   def initialize
     super
+    @mon_targets = [
+      { name: 'led_sudare_simulator', command: 'docker'},
+    ]
     timers = Timers::Group.new
     timers.every(2) {
       settings.sockets.each {|s|
-        s.send get_docker_stats.to_json
+        s.send get_docker_stats(@mon_targets).to_json
       }
     }
     print "async starting"
@@ -56,6 +54,9 @@ class App < Sinatra::Base
 
   get '/' do
     haml :index, locals: { title: 'Docker Container Monitor' }
+  end
+  get '/containers' do
+    @mon_targets.to_json
   end
   get '/ws' do
     if request.websocket?

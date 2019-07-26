@@ -14,4 +14,5 @@
     %script{ src: "/js/index.js" }
     %title=title
   %body
-  %canvas{id: 'myChart'}
+    - @mon_targets.each do |t|
+      %canvas{ class:'rtgraph' ,id: t[:name]}
