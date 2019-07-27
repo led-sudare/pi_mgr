@@ -14,5 +14,9 @@
     %script{ src: "/js/index.js" }
     %title=title
   %body
-    - @mon_targets.each do |t|
-      %canvas{ class:'rtgraph' ,id: t[:name]}
+    %div.table
+      - @mon_targets.each do |t|
+        %div.row
+          %div.text #{t[:name]} <br/> #{t[:host]} <br/> (#{t[:ip]})
+          %div.graph
+            %canvas{id:t[:name]}

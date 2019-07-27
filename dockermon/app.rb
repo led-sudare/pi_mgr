@@ -10,6 +10,11 @@ require 'uri'
 require 'thread/pool'
 require 'timers'
 
+def get_ip(target)
+  ping = `ping -c 1 #{target}`
+  firstline = ping.split("\n")[0]
+  firstline[/\((.*?)\)/, 1]
+end
 
 def get_docker_stats(targets)
   stats = []
@@ -18,7 +23,7 @@ def get_docker_stats(targets)
     raw_stats = `#{t[:command]} stats --no-stream #{t[:name]}`
     raw_stat = raw_stats.split("\n")[1]
     stat = raw_stat.split(" ")
-    stats << {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', '')}
+    stats << {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', ''), time:Time.now.iso8601}
   }
   stats
 end
@@ -35,8 +40,16 @@ class App < Sinatra::Base
   def initialize
     super
     @mon_targets = [
-      { name: 'led_sudare_simulator', command: 'docker'},
+      { name: 'cube_adapter', command: '../dockera', host:"sudarepi-a.local", ip:""},
+      { name: 'xproxy', command: '../dockera', host:"sudarepi-a.local", ip:""},
+      { name: 'demos', command: '../dockerb', host:"sudarepi-b.local", ip:""},
+      { name: 'sudare_sim', command: '../dockerc', host:"sudarepi-c.local", ip:""},
     ]
+
+    @mon_targets.each {|t|
+      t[:ip] = get_ip(t[:host])
+    }
+
     timers = Timers::Group.new
     timers.every(2) {
       settings.sockets.each {|s|
