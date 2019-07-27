@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
-sudo docker container restart cube_adapter
-sudo docker container restart xproxy
+echo "restarting.. " && sudo docker container restart cube_adapter
+echo "restarting.. " && sudo docker container restart xproxy

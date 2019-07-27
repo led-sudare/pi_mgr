@@ -1,0 +1,2 @@
+#!/bin/sh
+docker -H=sudarepi-c.local:80 $@
