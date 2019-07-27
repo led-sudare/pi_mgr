@@ -21,9 +21,12 @@ def get_docker_stats(targets)
 
   targets.each{|t|
     raw_stats = `#{t[:command]} stats --no-stream #{t[:name]}`
-    raw_stat = raw_stats.split("\n")[1]
-    stat = raw_stat.split(" ")
-    stats << {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', ''), time:Time.now.iso8601}
+    begin
+      raw_stat = raw_stats.split("\n")[1]
+      stat = raw_stat.split(" ")
+      stats << {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', ''), time:Time.now.iso8601}
+    rescue
+    end
   }
   stats
 end
@@ -51,9 +54,10 @@ class App < Sinatra::Base
     }
 
     timers = Timers::Group.new
-    timers.every(2) {
+    timers.every(1) {
+      stat = get_docker_stats(@mon_targets).to_json
       settings.sockets.each {|s|
-        s.send get_docker_stats(@mon_targets).to_json
+        s.send stat
       }
     }
     print "async starting"
