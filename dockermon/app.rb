@@ -9,6 +9,7 @@ require 'net/http'
 require 'uri'
 require 'thread/pool'
 require 'timers'
+require 'thwait'
 
 def get_ip(target)
   ping = `ping -c 1 #{target}`
@@ -18,15 +19,21 @@ end
 
 def get_docker_stats(targets)
   stats = []
+  threads = []
 
   targets.each{|t|
-    raw_stats = `#{t[:command]} stats --no-stream #{t[:name]}`
-    begin
-      raw_stat = raw_stats.split("\n")[1]
-      stat = raw_stat.split(" ")
-      stats << {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', ''), time:Time.now.iso8601}
-    rescue
-    end
+    threads << Thread.new {
+      raw_stats = `#{t[:command]} stats --no-stream #{t[:name]}`
+      begin
+        raw_stat = raw_stats.split("\n")[1]
+        stat = raw_stat.split(" ")
+        {name:stat[1], cpu:stat[2].gsub('%', ''), mem:stat[6].gsub('%', ''), time:Time.now.iso8601}
+      rescue
+      end
+    }
+  }
+  ThreadsWait.all_waits(*threads){ |th|
+    stats << th.value
   }
   stats
 end
@@ -54,7 +61,7 @@ class App < Sinatra::Base
     }
 
     timers = Timers::Group.new
-    timers.every(1) {
+    timers.every(3) {
       stat = get_docker_stats(@mon_targets).to_json
       settings.sockets.each {|s|
         s.send stat
