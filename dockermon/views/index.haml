@@ -17,6 +17,6 @@
     %div.table
       - @mon_targets.each do |t|
         %div.row
-          %div.text #{t[:name]} <br/> #{t[:host]} <br/> (#{t[:ip]})
+          %div.text #{t[:name]} <br/> #{t[:host]} <br/> (#{t[:ip]||"no such host"})
           %div.graph
             %canvas{id:t[:name]}

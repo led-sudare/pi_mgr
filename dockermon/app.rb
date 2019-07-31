@@ -12,8 +12,9 @@ require 'timers'
 require 'thwait'
 
 def get_ip(target)
-  ping = `ping -c 1 #{target}`
+  ping = `ping -c 1 -t 1 #{target}`
   firstline = ping.split("\n")[0]
+  return nil if firstline == nil
   firstline[/\((.*?)\)/, 1]
 end
 
